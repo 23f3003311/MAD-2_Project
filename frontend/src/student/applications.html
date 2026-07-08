@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Applications — PPA Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--primary:#2563eb;--text:#e6edf3;--muted:#8b949e;--success:#3fb950;--danger:#f85149;--warning:#d29922;--info:#58a6ff;}
+    *{box-sizing:border-box;}body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;margin:0;}
+    .sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+    .sidebar-brand{padding:20px 16px;border-bottom:1px solid var(--border);}
+    .sidebar-brand .logo{width:36px;height:36px;background:var(--primary);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;}
+    .sidebar-brand span{font-weight:700;font-size:15px;margin-left:10px;vertical-align:middle;}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--muted);font-size:14px;border-radius:8px;margin:2px 8px;text-decoration:none;transition:all .2s;}
+    .nav-link:hover,.nav-link.active{background:rgba(37,99,235,.15);color:var(--primary);}
+    .nav-link i{font-size:16px;width:18px;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .main{margin-left:240px;min-height:100vh;}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar h2{font-size:18px;font-weight:600;margin:0;}
+    .content{padding:28px;}
+    .stat-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+    .stat-chip{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;transition:all .2s;}
+    .app-card:hover{transform:translateY(-1px);}
+    .app-card.status-selected{border-left:4px solid var(--success);}
+    .app-card.status-shortlisted{border-left:4px solid var(--info);}
+    .app-card.status-applied{border-left:4px solid var(--primary);}
+    .app-card.status-rejected{border-left:4px solid var(--danger);}
+    .badge{font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;}
+    .export-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .progress-track{display:flex;gap:0;margin:8px 0;}
+    .prog-step{flex:1;text-align:center;position:relative;}
+    .prog-step::after{content:'';position:absolute;top:10px;right:-50%;width:100%;height:2px;background:var(--border);}
+    .prog-step:last-child::after{display:none;}
+    .prog-dot{width:20px;height:20px;border-radius:50%;margin:0 auto 4px;border:2px solid var(--border);background:var(--bg);}
+    .prog-dot.done{background:var(--success);border-color:var(--success);}
+    .prog-dot.current{background:var(--primary);border-color:var(--primary);}
+    .prog-dot.pending{background:var(--bg);}
+    .prog-label{font-size:10px;color:var(--muted);}
+  </style>
+</head>
+<body>
+{% raw %}
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo d-inline-flex"><i class="bi bi-person-fill text-white"></i></div>
+      <span>{{ studentName }}</span>
+    </div>
+    <div style="padding:12px 8px;">
+      <a href="/student/dashboard" class="nav-link"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+      <a href="/student/profile" class="nav-link"><i class="bi bi-person-circle"></i> My Profile</a>
+      <a href="/student/applications" class="nav-link active"><i class="bi bi-folder2-open"></i> My Applications</a>
+    </div>
+    <div class="sidebar-footer">
+      <button @click="logout" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="topbar">
+      <h2><i class="bi bi-folder2-open me-2"></i>My Applications</h2>
+      <span style="font-size:13px;color:var(--muted)">{{ applications.length }} applications submitted</span>
+    </div>
+
+    <div class="content">
+      
+      <div class="stat-row">
+        <div class="stat-chip" style="background:rgba(37,99,235,.1);color:var(--primary)">
+          <i class="bi bi-send me-1"></i>Applied: {{ countByStatus('applied') }}
+        </div>
+        <div class="stat-chip" style="background:rgba(88,166,255,.1);color:var(--info)">
+          <i class="bi bi-funnel me-1"></i>Shortlisted: {{ countByStatus('shortlisted') }}
+        </div>
+        <div class="stat-chip" style="background:rgba(63,185,80,.1);color:var(--success)">
+          <i class="bi bi-trophy me-1"></i>Selected: {{ countByStatus('selected') }}
+        </div>
+        <div class="stat-chip" style="background:rgba(248,81,73,.1);color:var(--danger)">
+          <i class="bi bi-x-circle me-1"></i>Rejected: {{ countByStatus('rejected') }}
+        </div>
+      </div>
+
+      
+      <div class="export-section">
+        <div>
+          <div style="font-weight:600;font-size:14px"><i class="bi bi-file-earmark-csv me-2" style="color:var(--success)"></i>Export Applications as CSV</div>
+          <div style="font-size:12px;color:var(--muted)">Download a detailed CSV report of all your applications</div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div v-if="exportStatus === 'pending'" style="font-size:13px;color:var(--warning)">
+            <span class="spinner-border spinner-border-sm me-1"></span>Preparing export…
+          </div>
+          <a v-if="exportFilename" :href="'/api/student/download-export/' + exportFilename" class="btn btn-sm btn-success"
+             download>
+            <i class="bi bi-download me-1"></i>Download CSV
+          </a>
+          <button class="btn btn-sm btn-outline-success" @click="triggerExport"
+                  :disabled="exportStatus === 'pending'">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>
+            {{ exportStatus === 'pending' ? 'Generating…' : 'Generate CSV' }}
+          </button>
+        </div>
+      </div>
+
+      
+      <div class="d-flex gap-2 mb-3 flex-wrap">
+        <button v-for="f in filterOptions" :key="f.val"
+                class="btn btn-sm" :class="statusFilter===f.val ? 'btn-primary' : 'btn-outline-secondary'"
+                @click="statusFilter=f.val">{{ f.label }}</button>
+      </div>
+
+      <div v-if="loading" class="text-center py-5" style="color:var(--muted)">
+        <div class="spinner-border" style="color:var(--primary)"></div>
+      </div>
+      <div v-else-if="filteredApps.length===0" class="text-center py-5" style="color:var(--muted)">
+        <i class="bi bi-folder2-open fs-1 mb-2 d-block"></i>
+        <h5>No applications yet</h5>
+        <p>Browse open drives and apply!</p>
+        <a href="/student/dashboard" class="btn btn-primary"><i class="bi bi-briefcase me-1"></i>Browse Drives</a>
+      </div>
+
+      <div v-for="app in filteredApps" :key="app.id"
+           class="app-card" :class="'status-' + app.status">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h5 style="font-size:15px;font-weight:600;margin:0">{{ app.job_title }}</h5>
+              <span :class="PPA.statusBadge(app.status)">{{ app.status }}</span>
+            </div>
+            <div style="font-size:13px;color:var(--muted)">
+              <i class="bi bi-building me-1"></i>{{ app.company_name }}
+              <span v-if="app.package">&nbsp;·&nbsp;<span style="color:var(--success)">{{ app.package }}</span></span>
+              <span v-if="app.location">&nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ app.location }}</span>
+            </div>
+            
+            <div class="progress-track mt-3">
+              <div v-for="step in progressSteps" :key="step.key" class="prog-step">
+                <div class="prog-dot"
+                     :class="stepClass(app.status, step.key)">
+                  <i v-if="stepClass(app.status, step.key)==='done'" class="bi bi-check" style="font-size:10px;color:white;display:block;text-align:center;line-height:16px"></i>
+                </div>
+                <div class="prog-label">{{ step.label }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="ms-3 text-end" style="min-width:130px;">
+            <div style="font-size:11px;color:var(--muted)">Applied</div>
+            <div style="font-size:13px;font-weight:500">{{ PPA.formatDate(app.applied_at) }}</div>
+            <div v-if="app.updated_at !== app.applied_at" style="font-size:11px;color:var(--muted)" class="mt-1">
+              Updated {{ PPA.formatDate(app.updated_at) }}
+            </div>
+          </div>
+        </div>
+
+        
+        <div v-if="app.status === 'selected'"
+             class="mt-3 p-3" style="background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);border-radius:8px;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-trophy-fill fs-5" style="color:var(--success)"></i>
+            <div>
+              <div style="font-weight:600;color:var(--success)">🎉 Congratulations! You've been selected!</div>
+              <div style="font-size:12px;color:var(--muted)">The company will reach out to you shortly with further details.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="/static/components/api.js"></script>
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+createApp({
+  setup() {
+    if (!PPA.requireRole('student')) return {};
+    const applications = ref([]);
+    const loading = ref(true);
+    const statusFilter = ref('');
+    const exportStatus = ref('');
+    const exportTaskId = ref('');
+    const exportFilename = ref('');
+    const studentName = ref(PPA.getName() || 'Student');
+
+    const filterOptions = [
+      { val: '', label: 'All' },
+      { val: 'applied', label: 'Applied' },
+      { val: 'shortlisted', label: 'Shortlisted' },
+      { val: 'selected', label: 'Selected' },
+      { val: 'rejected', label: 'Rejected' },
+    ];
+    const progressSteps = [
+      { key: 'applied', label: 'Applied' },
+      { key: 'shortlisted', label: 'Shortlisted' },
+      { key: 'selected', label: 'Selected' },
+    ];
+    const stepOrder = { applied: 0, shortlisted: 1, selected: 2, rejected: -1 };
+
+    function stepClass(appStatus, stepKey) {
+      if (appStatus === 'rejected') return 'pending';
+      const curr = stepOrder[appStatus] ?? 0;
+      const step = stepOrder[stepKey] ?? 0;
+      if (curr > step) return 'done';
+      if (curr === step) return 'current';
+      return 'pending';
+    }
+
+    const filteredApps = computed(() =>
+      !statusFilter.value ? applications.value
+        : applications.value.filter(a => a.status === statusFilter.value)
+    );
+    function countByStatus(s) { return applications.value.filter(a => a.status === s).length; }
+
+    async function loadApplications() {
+      loading.value = true;
+      const res = await PPA.get('/api/student/applications');
+      if (res && res.success) applications.value = res.data;
+      loading.value = false;
+    }
+
+    async function triggerExport() {
+      exportStatus.value = 'pending'; exportFilename.value = '';
+      const res = await PPA.post('/api/student/export-csv');
+      if (res && res.success) {
+        exportTaskId.value = res.data.task_id;
+        pollExport();
+      } else { exportStatus.value = ''; PPA.toast('Export failed.', 'danger'); }
+    }
+
+    async function pollExport() {
+      if (!exportTaskId.value) return;
+      const res = await PPA.get(`/api/student/export-status/${exportTaskId.value}`);
+      if (res && res.data?.state === 'SUCCESS') {
+        exportStatus.value = 'done';
+        exportFilename.value = res.data.result;
+        PPA.toast('CSV export ready!', 'success');
+      } else if (res && res.data?.state === 'FAILURE') {
+        exportStatus.value = ''; PPA.toast('Export failed.', 'danger');
+      } else {
+        setTimeout(pollExport, 2000);
+      }
+    }
+
+    function logout() { PPA.logout(); }
+    onMounted(loadApplications);
+    return { applications, loading, statusFilter, exportStatus, exportFilename,
+             filterOptions, progressSteps, filteredApps, studentName,
+             countByStatus, stepClass, triggerExport, logout, PPA };
+  }
+}).mount('#app');
+</script>
+{% endraw %}
+</body>
+</html>

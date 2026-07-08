@@ -1,0 +1,13 @@
+Flask>=3.0.3
+Flask-SQLAlchemy>=3.1.1
+Flask-JWT-Extended>=4.6.0
+Flask-Mail>=0.10.0
+Flask-Caching>=2.3.0
+Flask-CORS>=4.0.1
+celery>=5.3.6
+redis>=5.0.4
+Werkzeug>=3.0.3
+python-dotenv>=1.0.1
+xhtml2pdf>=0.2.16
+SQLAlchemy>=2.0.36
+requests>=2.32.3

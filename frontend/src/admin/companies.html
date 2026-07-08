@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Companies — PPA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
+          --primary:#2563eb;--text:#e6edf3;--muted:#8b949e;--success:#3fb950;--danger:#f85149;--warning:#d29922;}
+    *{box-sizing:border-box;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;margin:0;}
+    .sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:var(--surface);
+             border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+    .sidebar-brand{padding:20px 16px;border-bottom:1px solid var(--border);}
+    .sidebar-brand .logo{width:36px;height:36px;background:var(--primary);border-radius:8px;
+                         display:inline-flex;align-items:center;justify-content:center;}
+    .sidebar-brand span{font-weight:700;font-size:15px;margin-left:10px;vertical-align:middle;}
+    .sidebar-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:16px 16px 6px;}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--muted);
+              font-size:14px;border-radius:8px;margin:2px 8px;text-decoration:none;transition:all .2s;}
+    .nav-link:hover,.nav-link.active{background:rgba(37,99,235,.15);color:var(--primary);}
+    .nav-link i{font-size:16px;width:18px;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .main{margin-left:240px;min-height:100vh;}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);
+            padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar h2{font-size:18px;font-weight:600;margin:0;}
+    .content{padding:28px;}
+    .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+    .search-input{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 14px;font-size:14px;flex:1;min-width:200px;}
+    .search-input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px rgba(37,99,235,.2);}
+    .filter-select{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 14px;font-size:14px;}
+    .filter-select option{background:var(--surface);}
+    .data-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+    .data-card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .data-card-header h5{margin:0;font-size:15px;font-weight:600;}
+    .table{--bs-table-bg:transparent;--bs-table-color:var(--text);--bs-table-border-color:var(--border);font-size:14px;margin:0;}
+    .table th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:12px 16px;border-bottom:1px solid var(--border)!important;}
+    .table td{padding:12px 16px;vertical-align:middle;border-bottom:1px solid rgba(48,54,61,.6);}
+    .badge{font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;}
+    .action-btn{font-size:12px;padding:4px 12px;border-radius:6px;border:none;cursor:pointer;transition:all .2s;}
+    .btn-approve{background:rgba(63,185,80,.15);color:var(--success);border:1px solid rgba(63,185,80,.3);}
+    .btn-approve:hover{background:rgba(63,185,80,.25);}
+    .btn-reject{background:rgba(248,81,73,.15);color:var(--danger);border:1px solid rgba(248,81,73,.3);}
+    .btn-reject:hover{background:rgba(248,81,73,.25);}
+    .btn-blacklist{background:rgba(210,153,34,.1);color:var(--warning);border:1px solid rgba(210,153,34,.3);font-size:12px;padding:4px 12px;border-radius:6px;border:1px solid;cursor:pointer;}
+    .pagination{gap:4px;margin:16px;justify-content:center;}
+    .page-btn{background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 12px;font-size:13px;cursor:pointer;transition:all .2s;}
+    .page-btn.active,.page-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+    
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:90%;max-width:540px;max-height:90vh;overflow-y:auto;}
+    .modal-box h4{font-size:17px;font-weight:600;margin-bottom:16px;}
+    .detail-row{display:flex;gap:8px;margin-bottom:10px;font-size:14px;}
+    .detail-label{color:var(--muted);min-width:130px;font-weight:500;}
+    .form-textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 13px;font-size:14px;width:100%;resize:vertical;}
+    .form-textarea:focus{border-color:var(--primary);outline:none;}
+  </style>
+</head>
+<body>
+{% raw %}
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo d-inline-flex"><i class="bi bi-mortarboard-fill text-white"></i></div>
+      <span>PPA Admin</span>
+    </div>
+    <div class="sidebar-label">Navigation</div>
+    <a href="/admin/dashboard" class="nav-link"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+    <a href="/admin/companies" class="nav-link active"><i class="bi bi-building"></i> Companies</a>
+    <a href="/admin/students" class="nav-link"><i class="bi bi-people"></i> Students</a>
+    <a href="/admin/drives" class="nav-link"><i class="bi bi-briefcase"></i> Drives</a>
+    <div class="sidebar-footer">
+      <button @click="logout" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="topbar">
+      <h2><i class="bi bi-building me-2"></i>Company Management</h2>
+      <span style="font-size:13px;color:var(--muted)">{{ total }} companies registered</span>
+    </div>
+
+    <div class="content">
+      
+      <div class="filter-bar">
+        <input class="search-input" type="text" placeholder="🔍 Search by name, email, industry…"
+               v-model="searchQ" @keyup.enter="loadCompanies(1)" />
+        <select class="filter-select" v-model="statusFilter" @change="loadCompanies(1)">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button class="btn btn-primary btn-sm" @click="loadCompanies(1)">
+          <i class="bi bi-search me-1"></i>Search
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" @click="searchQ='';statusFilter='';loadCompanies(1)">Reset</button>
+      </div>
+
+      <div class="data-card">
+        <div class="data-card-header">
+          <h5>Companies</h5>
+          <div class="d-flex gap-2">
+            <span class="badge bg-warning text-dark">{{ pendingCount }} Pending</span>
+            <span class="badge bg-success">{{ approvedCount }} Approved</span>
+          </div>
+        </div>
+        <div v-if="loading" class="text-center py-5" style="color:var(--muted)">
+          <div class="spinner-border" style="color:var(--primary)"></div><p class="mt-2">Loading…</p>
+        </div>
+        <div v-else-if="companies.length===0" class="text-center py-5" style="color:var(--muted)">
+          <i class="bi bi-building fs-1 mb-2 d-block"></i>No companies found.
+        </div>
+        <div v-else class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Company</th><th>Industry</th><th>HR Contact</th>
+                <th>Status</th><th>Drives</th><th>Registered</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in companies" :key="c.id">
+                <td>
+                  <div class="fw-semibold">{{ c.company_name }}</div>
+                  <div style="font-size:12px;color:var(--muted)">{{ c.email }}</div>
+                </td>
+                <td><span style="font-size:13px;color:var(--muted)">{{ c.industry || '—' }}</span></td>
+                <td style="font-size:13px">{{ c.hr_contact || '—' }}</td>
+                <td>
+                  <span :class="PPA.statusBadge(c.approval_status)">{{ c.approval_status }}</span>
+                  <span v-if="c.is_blacklisted" class="badge bg-danger ms-1">blacklisted</span>
+                </td>
+                <td><span class="badge bg-secondary">{{ c.total_drives }}</span></td>
+                <td style="font-size:12px;color:var(--muted)">{{ PPA.formatDate(c.created_at) }}</td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <button class="action-btn" style="background:rgba(88,166,255,.1);color:#58a6ff;border:1px solid rgba(88,166,255,.3)"
+                            @click="viewCompany(c)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button v-if="c.approval_status==='pending'" class="action-btn btn-approve"
+                            @click="approveCompany(c)"><i class="bi bi-check-lg"></i> Approve</button>
+                    <button v-if="c.approval_status==='pending'" class="action-btn btn-reject"
+                            @click="openReject(c)"><i class="bi bi-x-lg"></i> Reject</button>
+                    <button class="action-btn btn-blacklist"
+                            @click="toggleBlacklist(c)">
+                      <i :class="c.is_blacklisted ? 'bi-unlock' : 'bi-slash-circle'"></i>
+                      {{ c.is_blacklisted ? 'Unblock' : 'Blacklist' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="d-flex pagination">
+          <button v-for="p in pages" :key="p" class="page-btn" :class="{active:p===currentPage}"
+                  @click="loadCompanies(p)">{{ p }}</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  
+  <div class="modal-overlay" v-if="viewModal" @click.self="viewModal=false">
+    <div class="modal-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4><i class="bi bi-building me-2"></i>{{ selectedCompany?.company_name }}</h4>
+        <button @click="viewModal=false" class="btn btn-sm btn-outline-secondary">✕</button>
+      </div>
+      <div v-if="selectedCompany">
+        <div class="detail-row"><span class="detail-label">Email:</span><span>{{ selectedCompany.email }}</span></div>
+        <div class="detail-row"><span class="detail-label">HR Contact:</span><span>{{ selectedCompany.hr_contact||'—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Industry:</span><span>{{ selectedCompany.industry||'—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Website:</span>
+          <a :href="selectedCompany.website" target="_blank" style="color:var(--primary)">{{ selectedCompany.website||'—' }}</a>
+        </div>
+        <div class="detail-row"><span class="detail-label">Status:</span>
+          <span :class="PPA.statusBadge(selectedCompany.approval_status)">{{ selectedCompany.approval_status }}</span>
+        </div>
+        <div class="detail-row"><span class="detail-label">Total Drives:</span><span>{{ selectedCompany.total_drives }}</span></div>
+        <div v-if="selectedCompany.description" class="mt-3">
+          <div class="detail-label mb-1">Description</div>
+          <p style="font-size:14px;color:var(--muted)">{{ selectedCompany.description }}</p>
+        </div>
+        <div v-if="selectedCompany.rejection_reason" class="mt-2 p-3" style="background:rgba(248,81,73,.08);border-radius:8px;">
+          <strong style="color:var(--danger)">Rejection Reason:</strong>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ selectedCompany.rejection_reason }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay" v-if="rejectModal" @click.self="rejectModal=false">
+    <div class="modal-box">
+      <h4><i class="bi bi-x-circle me-2" style="color:var(--danger)"></i>Reject Company</h4>
+      <p style="color:var(--muted);font-size:14px">Rejecting <strong>{{ rejectTarget?.company_name }}</strong>. Provide a reason (optional):</p>
+      <textarea class="form-textarea" v-model="rejectReason" rows="4"
+                placeholder="Enter reason for rejection…"></textarea>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-danger flex-fill" @click="confirmReject">Confirm Reject</button>
+        <button class="btn btn-outline-secondary flex-fill" @click="rejectModal=false">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="/static/components/api.js"></script>
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+createApp({
+  setup() {
+    if (!PPA.requireRole('admin')) return {};
+    const companies = ref([]);
+    const loading = ref(false);
+    const total = ref(0);
+    const pages = ref([]);
+    const currentPage = ref(1);
+    const searchQ = ref('');
+    const statusFilter = ref('');
+    const viewModal = ref(false);
+    const selectedCompany = ref(null);
+    const rejectModal = ref(false);
+    const rejectTarget = ref(null);
+    const rejectReason = ref('');
+
+    const pendingCount = computed(() => companies.value.filter(c => c.approval_status==='pending').length);
+    const approvedCount = computed(() => companies.value.filter(c => c.approval_status==='approved').length);
+
+    async function loadCompanies(page = 1) {
+      loading.value = true; currentPage.value = page;
+      const params = new URLSearchParams({ page, per_page: 15 });
+      if (searchQ.value) params.set('q', searchQ.value);
+      if (statusFilter.value) params.set('status', statusFilter.value);
+      const res = await PPA.get(`/api/admin/companies?${params}`);
+      if (res && res.success) {
+        companies.value = res.data.companies;
+        total.value = res.data.total;
+        pages.value = Array.from({ length: res.data.pages }, (_, i) => i + 1);
+      }
+      loading.value = false;
+    }
+
+    async function approveCompany(c) {
+      const res = await PPA.put(`/api/admin/companies/${c.id}/approve`);
+      if (res && res.success) { PPA.toast(res.message, 'success'); loadCompanies(currentPage.value); }
+      else PPA.toast(res?.message || 'Error', 'danger');
+    }
+
+    function openReject(c) { rejectTarget.value = c; rejectReason.value = ''; rejectModal.value = true; }
+    async function confirmReject() {
+      const res = await PPA.put(`/api/admin/companies/${rejectTarget.value.id}/reject`, { reason: rejectReason.value });
+      if (res && res.success) { PPA.toast(res.message, 'warning'); rejectModal.value = false; loadCompanies(currentPage.value); }
+      else PPA.toast(res?.message || 'Error', 'danger');
+    }
+
+    async function toggleBlacklist(c) {
+      const res = await PPA.put(`/api/admin/companies/${c.id}/blacklist`);
+      if (res && res.success) { PPA.toast(res.message, 'warning'); loadCompanies(currentPage.value); }
+    }
+
+    function viewCompany(c) { selectedCompany.value = c; viewModal.value = true; }
+    function logout() { PPA.logout(); }
+
+    onMounted(() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('status')) statusFilter.value = params.get('status');
+      loadCompanies(1);
+    });
+
+    return { companies, loading, total, pages, currentPage, searchQ, statusFilter,
+             viewModal, selectedCompany, rejectModal, rejectTarget, rejectReason,
+             pendingCount, approvedCount, loadCompanies, approveCompany,
+             openReject, confirmReject, toggleBlacklist, viewCompany, logout, PPA };
+  }
+}).mount('#app');
+</script>
+{% endraw %}
+</body>
+</html>
