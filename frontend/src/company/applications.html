@@ -138,7 +138,7 @@
                 <td style="font-size:12px;color:var(--muted)">{{ PPA.formatDate(a.applied_at) }}</td>
                 <td>
                   <a v-if="a.student?.has_resume"
-                     :href="'/uploads/' + 'resume_' + a.student?.id + '_'"
+                     :href="'/uploads/resume_' + a.student?.id + '_' + (a.student?.resume_filename || '')"
                      target="_blank" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-file-earmark-pdf"></i>
                   </a>
