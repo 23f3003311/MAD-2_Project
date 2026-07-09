@@ -10,12 +10,12 @@ class Config:
         "DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'ppa.db')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/1")
     CACHE_TYPE = "RedisCache"
-    CACHE_REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    CACHE_REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/1")
     CACHE_DEFAULT_TIMEOUT = 300  
-    CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-    CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/1")
+    CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://localhost:6379/1")
     CELERY_TIMEZONE = "Asia/Kolkata"
     CELERY_ENABLE_UTC = False
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.gmail.com")

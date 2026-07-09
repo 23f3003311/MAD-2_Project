@@ -216,8 +216,18 @@ def export_status(task_id):
         "ready": result.ready(),
     }
     if result.ready() and result.successful():
-        response["result"] = result.result
-        response["download_url"] = f"/api/student/download-export/{result.result}"
+        filename = result.result
+        export_dir = current_app.config["EXPORT_FOLDER"]
+        filepath = os.path.join(export_dir, secure_filename(filename))
+        
+        # Directory/file readiness check
+        if not os.path.exists(filepath):
+            # File is not fully written to disk yet
+            response["ready"] = False
+            response["state"] = "PENDING"
+        else:
+            response["result"] = filename
+            response["download_url"] = f"/api/student/download-export/{filename}"
     elif result.failed():
         response["error"] = str(result.result)
     return _ok(response)

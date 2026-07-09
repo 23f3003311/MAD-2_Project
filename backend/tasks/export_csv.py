@@ -48,6 +48,17 @@ def export_student_applications(self, student_id: int, user_id: int):
                     app.applied_at.strftime("%Y-%m-%d %H:%M") if app.applied_at else "N/A",
                     app.updated_at.strftime("%Y-%m-%d %H:%M") if app.updated_at else "N/A",
                 ])
+        
+        # Directory/file readiness check
+        import time
+        for _ in range(10):
+            if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                break
+            time.sleep(0.5)
+        else:
+            if not os.path.exists(filepath):
+                raise Exception("File was not created on disk in time.")
+
         logger.info(f"CSV export complete: {filename}")
         try:
             msg = Message(
