@@ -122,6 +122,10 @@ celery -A celery_worker.celery worker --beat --loglevel=info
 ```
 
 > **Note:** The `--beat` flag runs both the task worker and the scheduler (beat) in a single process, which is suitable for development. For production, run them as separate processes.
+Run this before you change the date for monthly reports.
+rm -f celerybeat-schedule celerybeat-schedule-shm celerybeat-schedule-wal
+celery -A celery_worker worker --beat --loglevel=info
+
 
 ---
 
