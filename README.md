@@ -84,26 +84,44 @@ redis-server
 ```
 
 ### 5. Run the Application
-You will need to open **3 separate terminal tabs** in the `backend/` directory.
+You will need to open **3 separate terminal windows/tabs**.
 
-**Terminal 1: Start the Flask API**
+---
+
+**🖥️ Terminal 1 — Backend (Flask API)**
+
 ```bash
 cd backend
+source ../.venv/bin/activate
 flask --app app run
 ```
-*The app will be accessible at http://127.0.0.1:5000*
+*The Flask API will be accessible at **http://127.0.0.1:5000***
 
-**Terminal 2: Start the Celery Worker**
+---
+
+**🌐 Terminal 2 — Frontend (Static File Server)**
+
+The frontend uses Vue.js 3 via CDN — no build step is required. Serve the static files using Python's built-in HTTP server:
+
+```bash
+cd frontend/src
+python3 -m http.server 8080
+```
+*The frontend will be accessible at **http://localhost:8080/login.html***
+
+---
+
+**⚙️ Terminal 3 — Celery Worker & Beat Scheduler**
+
+Run both the worker and beat together using Celery's embedded beat flag:
+
 ```bash
 cd backend
-celery -A celery_worker.celery worker --loglevel=info
+source ../.venv/bin/activate
+celery -A celery_worker.celery worker --beat --loglevel=info
 ```
 
-**Terminal 3: Start the Celery Beat (Scheduler)**
-```bash
-cd backend
-celery -A celery_worker.celery beat --loglevel=info
-```
+> **Note:** The `--beat` flag runs both the task worker and the scheduler (beat) in a single process, which is suitable for development. For production, run them as separate processes.
 
 ---
 

@@ -288,3 +288,11 @@ def search():
         ).limit(10).all()
         result["drives"] = [d.to_dict(include_company=True) for d in drives]
     return _ok(result)
+
+@admin_bp.route("/trigger-monthly-report", methods=["POST"])
+@admin_required
+def trigger_monthly_report():
+    """Manually trigger the monthly report — for testing/demo purposes."""
+    from tasks.monthly_report import send_monthly_report
+    task = send_monthly_report.delay()
+    return _ok({"task_id": task.id}, "Monthly report task queued successfully.")

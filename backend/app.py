@@ -15,13 +15,9 @@ def make_celery(app: Flask) -> None:
         timezone=app.config["CELERY_TIMEZONE"],
         enable_utc=app.config["CELERY_ENABLE_UTC"],
         beat_schedule={
-            "daily-reminders": {
-                "task": "tasks.daily_reminder.send_daily_reminders",
-                "schedule": crontab(hour=8, minute=0),
-            },
             "monthly-report": {
                 "task": "tasks.monthly_report.send_monthly_report",
-                "schedule": crontab(day_of_month=1, hour=0, minute=0),
+                "schedule": crontab(day_of_month=9, hour=19, minute=44),
             },
         },
     )

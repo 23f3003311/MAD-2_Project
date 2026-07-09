@@ -10,12 +10,8 @@ def send_monthly_report(self):
     from extensions import db, mail
     from models import Application, PlacementDrive, StudentProfile, CompanyProfile, User
     now = datetime.utcnow()
-    if now.month == 1:
-        report_month = 12
-        report_year = now.year - 1
-    else:
-        report_month = now.month - 1
-        report_year = now.year
+    report_month = now.month
+    report_year = now.year
     month_name = datetime(report_year, report_month, 1).strftime("%B %Y")
     drives_this_month = PlacementDrive.query.filter(
         db.extract("month", PlacementDrive.created_at) == report_month,
@@ -97,32 +93,32 @@ def _build_report_html(month_name, drives, total_applied, total_selected,
     <head>
         <meta charset="UTF-8">
         <style>
-            body {  font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f1f5f9; color: #1e293b; } 
-            .container {  max-width: 900px; margin: 30px auto; background: white; border-radius: 12px;
-                          box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; } 
-            .header {  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-                       color: white; padding: 40px; text-align: center; } 
-            .header h1 {  margin: 0; font-size: 28px; } 
-            .header p {  margin: 8px 0 0; opacity: 0.85; font-size: 16px; } 
-            .stats-grid {  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-                           background: #e2e8f0; margin: 0; } 
-            .stat-box {  background: white; padding: 24px; text-align: center; } 
-            .stat-box .num {  font-size: 36px; font-weight: 700; color: #2563eb; } 
-            .stat-box .label {  font-size: 13px; color: #64748b; margin-top: 4px; } 
-            .section {  padding: 30px 40px; } 
-            .section h2 {  font-size: 20px; color: #1e293b; border-left: 4px solid #2563eb;
-                           padding-left: 12px; margin-bottom: 16px; } 
-            table {  width: 100%; border-collapse: collapse; font-size: 14px; } 
-            th {  background: #f8fafc; color: #475569; padding: 10px 14px;
-                  text-align: left; font-weight: 600; border-bottom: 2px solid #e2e8f0; } 
-            td {  padding: 10px 14px; border-bottom: 1px solid #f1f5f9; } 
-            tr:hover td {  background: #f8fafc; } 
-            .badge {  display: inline-block; padding: 3px 10px; border-radius: 999px;
-                      font-size: 12px; font-weight: 600; } 
-            .badge-green {  background: #dcfce7; color: #15803d; } 
-            .badge-blue {  background: #dbeafe; color: #1d4ed8; } 
-            .footer {  background: #f8fafc; padding: 20px 40px; text-align: center;
-                       color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; } 
+            body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f1f5f9; color: #1e293b; }}
+            .container {{ max-width: 900px; margin: 30px auto; background: white; border-radius: 12px;
+                          box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }}
+            .header {{ background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+                       color: white; padding: 40px; text-align: center; }}
+            .header h1 {{ margin: 0; font-size: 28px; }}
+            .header p {{ margin: 8px 0 0; opacity: 0.85; font-size: 16px; }}
+            .stats-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+                           background: #e2e8f0; margin: 0; }}
+            .stat-box {{ background: white; padding: 24px; text-align: center; }}
+            .stat-box .num {{ font-size: 36px; font-weight: 700; color: #2563eb; }}
+            .stat-box .label {{ font-size: 13px; color: #64748b; margin-top: 4px; }}
+            .section {{ padding: 30px 40px; }}
+            .section h2 {{ font-size: 20px; color: #1e293b; border-left: 4px solid #2563eb;
+                           padding-left: 12px; margin-bottom: 16px; }}
+            table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
+            th {{ background: #f8fafc; color: #475569; padding: 10px 14px;
+                  text-align: left; font-weight: 600; border-bottom: 2px solid #e2e8f0; }}
+            td {{ padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }}
+            tr:hover td {{ background: #f8fafc; }}
+            .badge {{ display: inline-block; padding: 3px 10px; border-radius: 999px;
+                      font-size: 12px; font-weight: 600; }}
+            .badge-green {{ background: #dcfce7; color: #15803d; }}
+            .badge-blue {{ background: #dbeafe; color: #1d4ed8; }}
+            .footer {{ background: #f8fafc; padding: 20px 40px; text-align: center;
+                       color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; }}
         </style>
     </head>
     <body>
@@ -180,6 +176,7 @@ def _build_report_html(month_name, drives, total_applied, total_selected,
     </body>
     </html>
     """
+
 def _generate_pdf(html_content: str):
     try:
         from xhtml2pdf import pisa
